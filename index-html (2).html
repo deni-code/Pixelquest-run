@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelQuest Run</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1625;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            border: 4px solid #7b68ee;
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(123, 104, 238, 0.5);
+            overflow: hidden;
+        }
+        
+        canvas {
+            background-color: #191133;
+            display: block;
+        }
+        
+        #start-screen, #level-complete-screen, #game-over-screen, #game-complete-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(25, 17, 51, 0.9);
+            color: #66cdaa;
+            z-index: 10;
+        }
+        
+        #start-screen h1, #level-complete-screen h1, #game-over-screen h1, #game-complete-screen h1 {
+            color: #7b68ee;
+            text-shadow: 2px 2px 0px #34255a;
+            font-size: 48px;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+        
+        button {
+            background-color: #66cdaa;
+            color: #191133;
+            border: none;
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 8px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background-color: #7b68ee;
+            color: #fff;
+            transform: scale(1.05);
+        }
+        
+        #controls {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: #66cdaa;
+            font-size: 14px;
+            z-index: 5;
+        }
+        
+        #sound-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+            z-index: 5;
+        }
+        
+        .sound-btn {
+            background-color: rgba(123, 104, 238, 0.3);
+            color: #66cdaa;
+            border: 1px solid #66cdaa;
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        
+        .sound-btn.active {
+            background-color: rgba(102, 205, 170, 0.3);
+            color: #7b68ee;
+            border: 1px solid #7b68ee;
+        }
+        
+        #level-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #66cdaa;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 5;
+        }
+        
+        #level-complete-screen p, #game-complete-screen p {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        
+        #game-over-screen h1 {
+            color: #ff5555;
+        }
+        
+        #score-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        
+        .score-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .gem-icon, .multiplier-icon {
+            width: 24px;
+            height: 24px;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+        }
+        
+        .gem-icon {
+            background-color: #66cdaa;
+            border-radius: 4px;
+        }
+        
+        .multiplier-icon {
+            background-color: #7b68ee;
+            border-radius: 4px;
+        }
+        
+        #loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #191133;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: #66cdaa;
+            z-index: 100;
+        }
+        
+        #loading-bar-container {
+            width: 300px;
+            height: 20px;
+            background-color: #34255a;
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        
+        #loading-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #7b68ee;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas" width="800" height="600"></canvas>
+        
+        <div id="level-indicator">Level 1</div>
+        
+        <div id="score-container">
+            <div class="score-item">
+                <div class="gem-icon"></div>
+                <span id="gem-count">0</span>
+            </div>
+            <div class="score-item">
+                <div class="multiplier-icon"></div>
+                <span id="multiplier">x1.0</span>
+            </div>
+        </div>
+        
+        <div id="controls">Arrow Keys: Move | Space: Jump | Z: Special</div>
+        
+        <div id="sound-controls">
+            <button id="music-toggle" class="sound-btn active">Music: ON</button>
+            <button id="sfx-toggle" class="sound-btn active">SFX: ON</button>
+        </div>
+        
+        <div id="loading-screen">
+            <h2>Loading PixelQuest Run...</h2>
+            <div id="loading-bar-container">
+                <div id="loading-bar"></div>
+            </div>
+        </div>
+        
+        <div id="start-screen">
+            <h1>PixelQuest Run</h1>
+            <button id="start-button">START GAME</button>
+        </div>
+        
+        <div id="level-complete-screen" style="display: none;">
+            <h1>Level Complete!</h1>
+            <p>Gems collected: <span id="level-gems">0</span></p>
+            <button id="next-level-button">NEXT LEVEL</button>
+        </div>
+        
+        <div id="game-over-screen" style="display: none;">
+            <h1>Game Over</h1>
+            <p>Try again?</p>
+            <button id="restart-button">RESTART</button>
+        </div>
+        
+        <div id="game-complete-screen" style="display: none;">
+            <h1>Victory!</h1>
+            <p>You completed all levels!</p>
+            <p>Total gems collected: <span id="total-gems">0</span></p>
+            <button id="play-again-button">PLAY AGAIN</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
