@@ -65,8 +65,6 @@ A nostalgic 16-bit style platformer game built with pure HTML5 Canvas and JavaSc
 Play the game online: [PixelQuest Run Demo](#) *( URL )*
 
 
-```
-
 ## 🛠️ Technical Details
 
 ### Architecture
